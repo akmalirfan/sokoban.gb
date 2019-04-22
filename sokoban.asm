@@ -188,6 +188,44 @@ code_begins:
 	jr	z, .skip_left
 	ld	e, -1
 	GetSpriteXAddr	copyright
+	; Begin: Collision detection (LEFT)
+	; _SCRN + (y-$10) * 4 + (x - $8) / 8
+	push af
+	push hl
+	push de
+	; sub a, $8 ; No need because GetSpriteXAddr took care of that
+	sub a, $8 ; Because we want to know the tile left to the player
+	srl a
+	srl a
+	srl a
+	ld	h, a ; Using h as temporary storage
+	GetSpriteYAddr	copyright
+	; sub a, $10 ; No need because GetSpriteYAddr took care of that
+	ld	d, $98
+	sla a
+	jr nc, .cont1l
+	inc d
+	sla a
+	inc d
+	jr .cont2l
+.cont1l
+	sla a
+	jr nc, .cont2l
+	inc d
+.cont2l
+	add a, h ; TODO: Need to investigate the probability of having carry
+	ld l, a ; Place lower byte of tile address into l
+	ld h, d ; Place upper byte of tile address into h
+	ld	a, [hl]
+	or a ; Set zero flag
+	pop de
+	pop hl
+	jr z, .skip_coll
+	pop af
+	jr .skip_left
+.skip_coll
+	pop af
+	; End: Collision detection (LEFT)
 	dec	A
 	PutSpriteXAddr	copyright, a
 	add a, 8
