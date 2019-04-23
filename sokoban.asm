@@ -125,30 +125,10 @@ code_begins:
 	jr	z, .skip_up
 	ld	e, -1
 	; Begin: Collision detection (UP)
-	; _SCRN + (y-$10) * 4 + (x - $8) / 8
 	push af
 	push hl
 	push de
-	GetSpriteXAddr	copyright
-	; sub a, $8 ; No need because GetSpriteXAddr took care of that
-	srl a
-	srl a
-	srl a
-	ld	h, a ; Using h as temporary storage
-	GetSpriteYAddr	copyright
-	ld	d, $98
-	sla a
-	jr nc, .cont1u
-	inc d
-	sla a
-	inc d
-	jr .cont2u
-.cont1u
-	sla a
-	jr nc, .cont2u
-	inc d
-.cont2u
-	add a, h ; TODO: Need to investigate the probability of having carry
+	call GetTile
 	sub a, $20
 	ld l, a ; Place lower byte of tile address into l
 	ld h, d ; Place upper byte of tile address into h
@@ -175,32 +155,14 @@ code_begins:
 	ld	e, 1
 
 	; Begin: Collision detection (DOWN)
-	; _SCRN + (y-$10) * 4 + (x - $8) / 8
 	push af
 	push hl
 	push de
-	GetSpriteXAddr	copyright
-	; sub a, $8 ; No need because GetSpriteXAddr took care of that
-	srl a
-	srl a
-	srl a
-	ld	h, a ; Using h as temporary storage
-	GetSpriteYAddr	copyright
-	; sub a, $10 ; No need because GetSpriteYAddr took care of that
-	add a, $10
-	ld	d, $98
-	sla a
-	jr nc, .cont1d
+	call GetTile
+	add a, $40
+	jr nc, .nocarry
 	inc d
-	sla a
-	inc d
-	jr .cont2d
-.cont1d
-	sla a
-	jr nc, .cont2d
-	inc d
-.cont2d
-	add a, h ; TODO: Need to investigate the probability of having carry
+.nocarry
 	ld l, a ; Place lower byte of tile address into l
 	ld h, d ; Place upper byte of tile address into h
 	ld	a, [hl]
@@ -227,31 +189,14 @@ code_begins:
 	ld	e, -1
 	GetSpriteXAddr	copyright
 	; Begin: Collision detection (LEFT)
-	; _SCRN + (y-$10) * 4 + (x - $8) / 8
 	push af
 	push hl
 	push de
-	; sub a, $8 ; No need because GetSpriteXAddr took care of that
-	sub a, $8 ; Because we want to know the tile left to the player
-	srl a
-	srl a
-	srl a
-	ld	h, a ; Using h as temporary storage
-	GetSpriteYAddr	copyright
-	; sub a, $10 ; No need because GetSpriteYAddr took care of that
-	ld	d, $98
-	sla a
-	jr nc, .cont1l
+	call GetTile
+	dec a
+	jr nc, .nocarryl
 	inc d
-	sla a
-	inc d
-	jr .cont2l
-.cont1l
-	sla a
-	jr nc, .cont2l
-	inc d
-.cont2l
-	add a, h ; TODO: Need to investigate the probability of having carry
+.nocarryl
 	ld l, a ; Place lower byte of tile address into l
 	ld h, d ; Place upper byte of tile address into h
 	ld	a, [hl]
@@ -280,31 +225,14 @@ code_begins:
 	GetSpriteXAddr	copyright
 
 	; Begin: Collision detection (RIGHT)
-	; _SCRN + (y-$10) * 4 + (x - $8) / 8
 	push af
 	push hl
 	push de
-	; sub a, $8 ; No need because GetSpriteXAddr took care of that
-	add a, $8 ; Because we want to know the tile right to the player
-	srl a
-	srl a
-	srl a
-	ld	h, a ; Using h as temporary storage
-	GetSpriteYAddr	copyright
-	; sub a, $10 ; No need because GetSpriteYAddr took care of that
-	ld	d, $98
-	sla a
-	jr nc, .cont1
+	call GetTile
+	inc a
+	jr nc, .nocarryr
 	inc d
-	sla a
-	inc d
-	jr .cont2
-.cont1
-	sla a
-	jr nc, .cont2
-	inc d
-.cont2
-	add a, h ; TODO: Need to investigate the probability of having carry
+.nocarryr
 	ld l, a ; Place lower byte of tile address into l
 	ld h, d ; Place upper byte of tile address into h
 	ld	a, [hl]
@@ -363,4 +291,27 @@ jpad_GetKeys:
 	ld	[rJOYPAD], a		; reset joypad
 
 	ld	a, b	; register A holds result. Each bit represents a key
+	ret
+
+GetTile:
+	; _SCRN + (y-$10) * 4 + (x - $8) / 8
+	GetSpriteXAddr	copyright
+	srl a
+	srl a
+	srl a
+	ld	h, a ; Using h as temporary storage
+	GetSpriteYAddr	copyright
+	ld	d, $98
+	sla a
+	jr nc, .cont1u
+	inc d
+	sla a
+	inc d
+	jr .cont2u
+.cont1u
+	sla a
+	jr nc, .cont2u
+	inc d
+.cont2u
+	add a, h ; TODO: Need to investigate the probability of having carry
 	ret
