@@ -229,7 +229,7 @@ code_begins:
 	push hl
 	push de
 	call GetTile
-	inc a
+	add a, 2
 	jr nc, .nocarryr
 	inc d
 .nocarryr
