@@ -124,6 +124,44 @@ code_begins:
 	and	PADF_UP	; compare joypad info. Set NZ flag if UP bit present
 	jr	z, .skip_up
 	ld	e, -1
+	; Begin: Collision detection (UP)
+	; _SCRN + (y-$10) * 4 + (x - $8) / 8
+	push af
+	push hl
+	push de
+	GetSpriteXAddr	copyright
+	; sub a, $8 ; No need because GetSpriteXAddr took care of that
+	srl a
+	srl a
+	srl a
+	ld	h, a ; Using h as temporary storage
+	GetSpriteYAddr	copyright
+	ld	d, $98
+	sla a
+	jr nc, .cont1u
+	inc d
+	sla a
+	inc d
+	jr .cont2u
+.cont1u
+	sla a
+	jr nc, .cont2u
+	inc d
+.cont2u
+	add a, h ; TODO: Need to investigate the probability of having carry
+	sub a, $20
+	ld l, a ; Place lower byte of tile address into l
+	ld h, d ; Place upper byte of tile address into h
+	ld	a, [hl]
+	or a ; Set zero flag
+	pop de
+	pop hl
+	jr z, .skip_colu
+	pop af
+	jr .skip_up
+.skip_colu
+	pop af
+	; End: Collision detection (UP)
 	GetSpriteYAddr	copyright
 	dec	A
 	PutSpriteYAddr	copyright, a
