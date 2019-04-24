@@ -92,7 +92,7 @@ code_begins:
 	add	a, e
 	PutSpriteYAddr	copyright, a
 	PutSpriteYAddr	copyright2, a
-	jp .check_hor
+	jp .loop
 
 .pop_af
 	pop af
@@ -107,6 +107,7 @@ code_begins:
 	PutSpriteXAddr	copyright, a
 	add a, 8 ; Because the second sprite is 8 pixels to the right
 	PutSpriteXAddr	copyright2, a
+	jr .loop
 
 ; From here, should check the current direction and stop the player
 ; from moving if there's something blocking
