@@ -66,13 +66,13 @@ code_begins:
 
 	; see where we declare "copyright" as a sprite-variable above
 	; set X=20, Y=10, Tile=$19, Flags=0
-	PutSpriteXAddr	copyright, 8
-	PutSpriteYAddr	copyright, 8
+	PutSpriteXAddr	copyright, 16
+	PutSpriteYAddr	copyright, 16
 	sprite_PutTile	copyright, $19
 	sprite_PutFlags	copyright, $00
 
-	PutSpriteXAddr	copyright2, 16
-	PutSpriteYAddr	copyright2, 8
+	PutSpriteXAddr	copyright2, 24
+	PutSpriteYAddr	copyright2, 16
 	sprite_PutTile	copyright2, $17
 	sprite_PutFlags	copyright2, $00
 
@@ -83,13 +83,11 @@ code_begins:
 	; so only 60fps. That makes the sprite movement here manageable
 	nop
 
-	; Check whether the y-coordinate % 8 is 0
+	; Check whether the y-coordinate % 16 is 0
 	GetSpriteYAddr	copyright
-	; ld	d, a
 	push af
-	and $7
+	and $f
 	jr z, .pop_af
-	; ld	a, d
 	pop af
 	add	a, e
 	PutSpriteYAddr	copyright, a
@@ -99,22 +97,19 @@ code_begins:
 .pop_af
 	pop af
 .check_hor
-	; Check whether the x-coordinate % 8 is 0
+	; Check whether the x-coordinate % 16 is 0
 	GetSpriteXAddr	copyright
 	ld	d, a
-	and $7
+	and $f
 	jr z, .cont
 	ld	a, d
 	add	a, e
 	PutSpriteXAddr	copyright, a
-	add a, 8
+	add a, 8 ; Because the second sprite is 8 pixels to the right
 	PutSpriteXAddr	copyright2, a
 
 ; From here, should check the current direction and stop the player
 ; from moving if there's something blocking
-
-; Or maybe can check when the start pushing any direction.
-; This way, don't have to check all directions
 
 .cont
 	call	jpad_GetKeys
