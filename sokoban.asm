@@ -58,9 +58,18 @@ code_begins:
 	ld	[rIE], a	; Set only Vblank interrupt flag
 	ei			; enable interrupts. Only vblank will trigger
 
+	ld	a,0		;
+	ldh	[rLCDC],a	;turn off LCD
+
+	call LOAD_TILES
+	ld	a,%11100100	;load a normal palette up 11 10 01 00 - dark->light
+	ldh	[rBGP],a	;load the palette
+	ldh	[rOBP0],a	;load the palette
+
 	ld	a, [rLCDC]	; fetch LCD Config. (Each bit is a flag)
 	or	LCDCF_OBJON	; enable sprites through "OBJects ON" flag
 	or	LCDCF_OBJ16	; enable 8bit wide sprites (vs. 16-bit wide)
+	or	%10010001
 	ld	[rLCDC], a	; save LCD Config. Sprites are now visible.
 
 
@@ -68,12 +77,12 @@ code_begins:
 	; set X=20, Y=10, Tile=$19, Flags=0
 	PutSpriteXAddr	copyright, 16
 	PutSpriteYAddr	copyright, 16
-	sprite_PutTile	copyright, $19
+	sprite_PutTile	copyright, $02
 	sprite_PutFlags	copyright, $00
 
 	PutSpriteXAddr	copyright2, 24
 	PutSpriteYAddr	copyright2, 16
-	sprite_PutTile	copyright2, $17
+	sprite_PutTile	copyright2, $04
 	sprite_PutFlags	copyright2, $00
 
 	ld e, $16
@@ -311,3 +320,41 @@ GetTile:
 .cont2u
 	add a, h ; TODO: Need to investigate the probability of having carry
 	ret
+
+; TODO: Load tiles up until where the tile data is only
+LOAD_TILES::
+	ld	hl,MONSTA_TILES
+	ld	de,_VRAM
+	ld	bc,9*16	;we have 9 tiles and each tile takes 16 bytes
+LOAD_TILES_LOOP::
+	ld	a,[hl+]	;get a byte from our tiles, and increment.
+	ld	[de],a	;put that byte in VRAM and
+	inc	de		;increment.
+	dec	bc		;bc=bc-1.
+	ld	a,b		;if b or c != 0,
+	or	c		;
+	jr	nz,LOAD_TILES_LOOP	;then loop.
+	ret			;done
+
+ SECTION "Tiles", ROM0
+
+; Start of tile array.
+MONSTA_TILES::
+
+; DB $44,$44,$44,$44,$44,$44,$7C,$7C
+; DB $44,$44,$44,$44,$44,$44,$44,$44
+
+DB $00,$00,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$00,$00
+
+DB $C6,$C6,$C6,$C6,$C6,$C6,$FE,$FE
+DB $FE,$FE,$C6,$C6,$C6,$C6,$C6,$C6
+
+DB $0F,$00,$1F,$00,$1F,$00,$1F,$00
+DB $1F,$00,$1F,$06,$1F,$66,$1F,$E0
+DB $1F,$E0,$0F,$F0,$00,$DF,$00,$DF
+DB $00,$DF,$00,$1F,$00,$1C,$00,$1C
+DB $F0,$00,$F8,$00,$F8,$00,$F8,$00
+DB $F8,$00,$F8,$60,$F8,$66,$F8,$07
+DB $F8,$07,$F0,$0F,$00,$FB,$00,$FB
+DB $00,$FB,$00,$F8,$00,$38,$00,$38
