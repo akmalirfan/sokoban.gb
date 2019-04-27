@@ -82,8 +82,8 @@ code_begins:
 
 	PutSpriteXAddr	copyright2, 24
 	PutSpriteYAddr	copyright2, 16
-	sprite_PutTile	copyright2, $04
-	sprite_PutFlags	copyright2, $00
+	sprite_PutTile	copyright2, $02
+	sprite_PutFlags	copyright2, $20
 
 	ld e, $16
 .loop
@@ -218,7 +218,6 @@ code_begins:
 	PutSpriteXAddr	copyright, a
 	add a, 8
 	PutSpriteXAddr	copyright2, a
-	sprite_PutFlags	copyright, %00100000
 	jp .skip_right
 .skip_left
 	pop	af
@@ -324,8 +323,8 @@ GetTile:
 ; TODO: Load tiles up until where the tile data is only
 LOAD_TILES::
 	ld	hl,MONSTA_TILES
-	ld	de,_VRAM
-	ld	bc,9*16	;we have 9 tiles and each tile takes 16 bytes
+	ld	de,_VRAM + 16 ; Skip the first 16 bytes to preserve the blank tile
+	ld	bc,3*16	;we have 9 tiles and each tile takes 16 bytes
 LOAD_TILES_LOOP::
 	ld	a,[hl+]	;get a byte from our tiles, and increment.
 	ld	[de],a	;put that byte in VRAM and
@@ -340,13 +339,6 @@ LOAD_TILES_LOOP::
 
 ; Start of tile array.
 MONSTA_TILES::
-
-; DB $44,$44,$44,$44,$44,$44,$7C,$7C
-; DB $44,$44,$44,$44,$44,$44,$44,$44
-
-DB $00,$00,$00,$00,$00,$00,$00,$00
-DB $00,$00,$00,$00,$00,$00,$00,$00
-
 DB $C6,$C6,$C6,$C6,$C6,$C6,$FE,$FE
 DB $FE,$FE,$C6,$C6,$C6,$C6,$C6,$C6
 
@@ -354,7 +346,3 @@ DB $0F,$00,$1F,$00,$1F,$00,$1F,$00
 DB $1F,$00,$1F,$06,$1F,$66,$1F,$E0
 DB $1F,$E0,$0F,$F0,$00,$DF,$00,$DF
 DB $00,$DF,$00,$1F,$00,$1C,$00,$1C
-DB $F0,$00,$F8,$00,$F8,$00,$F8,$00
-DB $F8,$00,$F8,$60,$F8,$66,$F8,$07
-DB $F8,$07,$F0,$0F,$00,$FB,$00,$FB
-DB $00,$FB,$00,$F8,$00,$38,$00,$38
