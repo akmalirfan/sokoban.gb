@@ -367,8 +367,8 @@ LOAD_MAP_LOOP::
 
 ; Start of tile array.
 TILES_DATA::
-DB $C6,$C6,$C6,$C6,$C6,$C6,$FE,$FE
-DB $FE,$FE,$C6,$C6,$C6,$C6,$C6,$C6
+DB $FF,$00,$02,$FD,$02,$FD,$02,$FD
+DB $FF,$00,$20,$DF,$20,$DF,$20,$DF
 
 DB $0F,$00,$1F,$00,$1F,$00,$1F,$00
 DB $1F,$00,$1F,$06,$1F,$66,$1F,$E0
