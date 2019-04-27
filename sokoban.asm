@@ -45,8 +45,8 @@ SECTION "rom header", ROM0[$0104]
 ; here's where you can include additional .asm modules
 include "memory.asm"
 
-	SpriteAttr	copyright	; declare "copyright" as a sprite
-	SpriteAttr	copyright2
+	SpriteAttr	player1	; declare "player1" as a sprite
+	SpriteAttr	player2
 
 code_begins:
 	di	; disable interrupts
@@ -74,17 +74,17 @@ code_begins:
 	ld	[rLCDC], a	; save LCD Config. Sprites are now visible.
 
 
-	; see where we declare "copyright" as a sprite-variable above
+	; see where we declare "player1" as a sprite-variable above
 	; set X=20, Y=10, Tile=$19, Flags=0
-	PutSpriteXAddr	copyright, 16 * 5 ; * 6
-	PutSpriteYAddr	copyright, 16 * 4 ; * 5
-	sprite_PutTile	copyright, $02
-	sprite_PutFlags	copyright, $00
+	PutSpriteXAddr	player1, 16 * 5 ; * 6
+	PutSpriteYAddr	player1, 16 * 4 ; * 5
+	sprite_PutTile	player1, $02
+	sprite_PutFlags	player1, $00
 
-	PutSpriteXAddr	copyright2, 16 * 5 + 8
-	PutSpriteYAddr	copyright2, 16 * 4
-	sprite_PutTile	copyright2, $02
-	sprite_PutFlags	copyright2, $20
+	PutSpriteXAddr	player2, 16 * 5 + 8
+	PutSpriteYAddr	player2, 16 * 4
+	sprite_PutTile	player2, $02
+	sprite_PutFlags	player2, $20
 
 	ld e, $16
 .loop
@@ -94,29 +94,29 @@ code_begins:
 	nop
 
 	; Check whether the y-coordinate % 16 is 0
-	GetSpriteYAddr	copyright
+	GetSpriteYAddr	player1
 	push af
 	and $f
 	jr z, .pop_af
 	pop af
 	add	a, e
-	PutSpriteYAddr	copyright, a
-	PutSpriteYAddr	copyright2, a
+	PutSpriteYAddr	player1, a
+	PutSpriteYAddr	player2, a
 	jp .loop
 
 .pop_af
 	pop af
 .check_hor
 	; Check whether the x-coordinate % 16 is 0
-	GetSpriteXAddr	copyright
+	GetSpriteXAddr	player1
 	ld	d, a
 	and $f
 	jr z, .cont
 	ld	a, d
 	add	a, e
-	PutSpriteXAddr	copyright, a
+	PutSpriteXAddr	player1, a
 	add a, 8 ; Because the second sprite is 8 pixels to the right
-	PutSpriteXAddr	copyright2, a
+	PutSpriteXAddr	player2, a
 	jr .loop
 
 ; From here, should check the current direction and stop the player
@@ -148,10 +148,10 @@ code_begins:
 .skip_colu
 	pop af
 	; End: Collision detection (UP)
-	GetSpriteYAddr	copyright
+	GetSpriteYAddr	player1
 	dec	A
-	PutSpriteYAddr	copyright, a
-	PutSpriteYAddr	copyright2, a
+	PutSpriteYAddr	player1, a
+	PutSpriteYAddr	player2, a
 	jp .skip_right
 .skip_up
 	pop	af	; restore register A (joypad info)
@@ -179,10 +179,10 @@ code_begins:
 	pop af
 	; End: Collision detection (DOWN)
 
-	GetSpriteYAddr	copyright
+	GetSpriteYAddr	player1
 	inc	A
-	PutSpriteYAddr	copyright, a
-	PutSpriteYAddr	copyright2, a
+	PutSpriteYAddr	player1, a
+	PutSpriteYAddr	player2, a
 	jp .skip_right
 .skip_down
 	pop	af
@@ -190,7 +190,7 @@ code_begins:
 	and	PADF_LEFT
 	jr	z, .skip_left
 	ld	e, -1
-	GetSpriteXAddr	copyright
+	GetSpriteXAddr	player1
 	; Begin: Collision detection (LEFT)
 	push af
 	push hl
@@ -210,9 +210,9 @@ code_begins:
 	pop af
 	; End: Collision detection (LEFT)
 	dec	A
-	PutSpriteXAddr	copyright, a
+	PutSpriteXAddr	player1, a
 	add a, 8
-	PutSpriteXAddr	copyright2, a
+	PutSpriteXAddr	player2, a
 	jp .skip_right
 .skip_left
 	pop	af
@@ -221,7 +221,7 @@ code_begins:
 	jr	z, .skip_right
 	ld	e, 1
 
-	GetSpriteXAddr	copyright
+	GetSpriteXAddr	player1
 
 	; Begin: Collision detection (RIGHT)
 	push af
@@ -242,10 +242,10 @@ code_begins:
 	pop af
 	; End: Collision detection (RIGHT)
 	inc	A
-	PutSpriteXAddr	copyright, a
+	PutSpriteXAddr	player1, a
 	add a, 8
-	PutSpriteXAddr	copyright2, a
-	sprite_PutFlags	copyright, $00
+	PutSpriteXAddr	player2, a
+	sprite_PutFlags	player1, $00
 
 .skip_right
 	pop	af
@@ -291,12 +291,12 @@ jpad_GetKeys:
 
 GetTile:
 	; _SCRN + (y-$10) * 4 + (x - $8) / 8
-	GetSpriteXAddr	copyright
+	GetSpriteXAddr	player1
 	srl a
 	srl a
 	srl a
 	ld	l, a ; Using l as temporary storage
-	GetSpriteYAddr	copyright
+	GetSpriteYAddr	player1
 	ld	h, $98
 	sla a
 	jr nc, .cont1u
