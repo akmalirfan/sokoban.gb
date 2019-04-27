@@ -135,7 +135,7 @@ code_begins:
 	push hl
 	push de
 	call GetTile
-	sub a, $20
+	sub a, $40
 	jr nc, .no_borrow
 	dec d
 .no_borrow
@@ -202,9 +202,9 @@ code_begins:
 	push hl
 	push de
 	call GetTile
-	dec a
+	sub a, 2
 	jr nc, .nocarryl
-	inc d
+	dec d
 .nocarryl
 	ld l, a ; Place lower byte of tile address into l
 	ld h, d ; Place upper byte of tile address into h
