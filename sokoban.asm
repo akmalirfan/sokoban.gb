@@ -133,17 +133,14 @@ code_begins:
 	; Begin: Collision detection (UP)
 	push af
 	push hl
-	push de
 	call GetTile
 	sub a, $40
 	jr nc, .no_borrow
-	dec d
+	dec h
 .no_borrow
 	ld l, a ; Place lower byte of tile address into l
-	ld h, d ; Place upper byte of tile address into h
 	ld	a, [hl]
 	or a ; Set zero flag
-	pop de
 	pop hl
 	jr z, .skip_colu
 	pop af
@@ -166,17 +163,14 @@ code_begins:
 	; Begin: Collision detection (DOWN)
 	push af
 	push hl
-	push de
 	call GetTile
 	add a, $40
 	jr nc, .nocarry
-	inc d
+	inc h
 .nocarry
 	ld l, a ; Place lower byte of tile address into l
-	ld h, d ; Place upper byte of tile address into h
 	ld	a, [hl]
 	or a ; Set zero flag
-	pop de
 	pop hl
 	jr z, .skip_cold
 	pop af
@@ -200,17 +194,14 @@ code_begins:
 	; Begin: Collision detection (LEFT)
 	push af
 	push hl
-	push de
 	call GetTile
 	sub a, 2
 	jr nc, .nocarryl
-	dec d
+	dec h
 .nocarryl
 	ld l, a ; Place lower byte of tile address into l
-	ld h, d ; Place upper byte of tile address into h
 	ld	a, [hl]
 	or a ; Set zero flag
-	pop de
 	pop hl
 	jr z, .skip_coll
 	pop af
@@ -235,17 +226,14 @@ code_begins:
 	; Begin: Collision detection (RIGHT)
 	push af
 	push hl
-	push de
 	call GetTile
 	add a, 2
 	jr nc, .nocarryr
-	inc d
+	inc h
 .nocarryr
 	ld l, a ; Place lower byte of tile address into l
-	ld h, d ; Place upper byte of tile address into h
 	ld	a, [hl]
 	or a ; Set zero flag
-	pop de
 	pop hl
 	jr z, .skip_colr
 	pop af
@@ -307,21 +295,21 @@ GetTile:
 	srl a
 	srl a
 	srl a
-	ld	h, a ; Using h as temporary storage
+	ld	l, a ; Using l as temporary storage
 	GetSpriteYAddr	copyright
-	ld	d, $98
+	ld	h, $98
 	sla a
 	jr nc, .cont1u
-	inc d
+	inc h
 	sla a
-	inc d
+	inc h
 	jr .cont2u
 .cont1u
 	sla a
 	jr nc, .cont2u
-	inc d
+	inc h
 .cont2u
-	add a, h ; TODO: Need to investigate the probability of having carry
+	add a, l ; TODO: Need to investigate the probability of having carry
 	ret
 
 LOAD_TILES::
