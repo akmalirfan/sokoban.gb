@@ -62,6 +62,7 @@ code_begins:
 	ldh	[rLCDC],a	;turn off LCD
 
 	call LOAD_TILES
+	call LOAD_MAP
 	ld	a,%11100100	;load a normal palette up 11 10 01 00 - dark->light
 	ldh	[rBGP],a	;load the palette
 	ldh	[rOBP0],a	;load the palette
@@ -75,13 +76,13 @@ code_begins:
 
 	; see where we declare "copyright" as a sprite-variable above
 	; set X=20, Y=10, Tile=$19, Flags=0
-	PutSpriteXAddr	copyright, 16
-	PutSpriteYAddr	copyright, 16
+	PutSpriteXAddr	copyright, 16 * 5 ; * 6
+	PutSpriteYAddr	copyright, 16 * 4 ; * 5
 	sprite_PutTile	copyright, $02
 	sprite_PutFlags	copyright, $00
 
-	PutSpriteXAddr	copyright2, 24
-	PutSpriteYAddr	copyright2, 16
+	PutSpriteXAddr	copyright2, 16 * 5 + 8
+	PutSpriteYAddr	copyright2, 16 * 4
 	sprite_PutTile	copyright2, $02
 	sprite_PutFlags	copyright2, $20
 
@@ -320,9 +321,8 @@ GetTile:
 	add a, h ; TODO: Need to investigate the probability of having carry
 	ret
 
-; TODO: Load tiles up until where the tile data is only
 LOAD_TILES::
-	ld	hl,MONSTA_TILES
+	ld	hl,TILES_DATA
 	ld	de,_VRAM + 16 ; Skip the first 16 bytes to preserve the blank tile
 	ld	bc,3*16	;we have 9 tiles and each tile takes 16 bytes
 LOAD_TILES_LOOP::
@@ -335,10 +335,35 @@ LOAD_TILES_LOOP::
 	jr	nz,LOAD_TILES_LOOP	;then loop.
 	ret			;done
 
+LOAD_MAP::
+	ld	hl,LEVEL_1	;our little map
+	ld	de,_SCRN0	;where our map goes
+	ld	b,18
+	ld	c,$14
+LOAD_MAP_LOOP::
+	ld	a,[hl+]	;get a byte of the map and inc hl
+	ld	[de],a	;put the byte at de
+	inc	de		;duh...
+	dec	c		;decrement our counter
+	jr	nz,LOAD_MAP_LOOP	;and of the counter != 0 then loop
+	; Add $0D to de
+	ld a, e
+	add a, $0C ; $20 - $13
+	ld e, a
+	jr nc, .TERUS
+	inc d
+.TERUS
+	dec b
+	jr z, .HABIS
+	ld c, $14
+	jr LOAD_MAP_LOOP
+.HABIS
+	ret			;done
+
  SECTION "Tiles", ROM0
 
 ; Start of tile array.
-MONSTA_TILES::
+TILES_DATA::
 DB $C6,$C6,$C6,$C6,$C6,$C6,$FE,$FE
 DB $FE,$FE,$C6,$C6,$C6,$C6,$C6,$C6
 
@@ -346,3 +371,25 @@ DB $0F,$00,$1F,$00,$1F,$00,$1F,$00
 DB $1F,$00,$1F,$06,$1F,$66,$1F,$E0
 DB $1F,$E0,$0F,$F0,$00,$DF,$00,$DF
 DB $00,$DF,$00,$1F,$00,$1C,$00,$1C
+
+SECTION "Map", ROM0
+
+LEVEL_1::
+DB $00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$01,$01,$00,$00,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$01,$01,$00,$00,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$01,$01,$00,$00,$01,$01,$01,$01,$01,$01,$01,$01,$00,$00
+DB $00,$00,$00,$00,$00,$00,$01,$01,$00,$00,$01,$01,$01,$01,$01,$01,$01,$01,$00,$00
+DB $00,$00,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$00,$00
+DB $00,$00,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$00,$00
+DB $00,$00,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01,$00,$00
+DB $00,$00,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01,$00,$00
+DB $00,$00,$01,$01,$01,$01,$01,$01,$01,$01,$00,$00,$01,$01,$00,$00,$00,$00,$00,$00
+DB $00,$00,$01,$01,$01,$01,$01,$01,$01,$01,$00,$00,$01,$01,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$00,$00,$01,$01,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$00,$00,$01,$01,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
