@@ -224,6 +224,7 @@ code_begins:
 	GetSpriteXAddr	player1
 
 	; Begin: Collision detection (RIGHT)
+	push de
 	push af
 	push hl
 	call GetTile
@@ -232,20 +233,41 @@ code_begins:
 	inc h
 .nocarryr
 	ld l, a ; Place lower byte of tile address into l
+	ld	d, h
+	add	a, 2
+	jr nc, .nocarry2r
+	inc d
+.nocarry2r
+	ld e, a ; Now, DE contains the address of 2 tiles ahead
 	ld	a, [hl]
 	or a ; Set zero flag
-	pop hl
 	jr z, .skip_colr
+	; Check whether the tile is a crate
+	cp a, 4
+	; If so, check tile after the crate
+	jr nz, .not_crate
+	ld	a, [de]
+	or	a
+	jr nz, .not_crate
+	ld [hl], 0
+	ld h, d
+	ld l, e
+	ld [hl], 4
+	jr .skip_colr
+.not_crate
+	pop hl
 	pop af
+	pop de
 	jr .skip_right
 .skip_colr
+	pop hl
 	pop af
 	; End: Collision detection (RIGHT)
 	inc	A
 	PutSpriteXAddr	player1, a
 	add a, 8
 	PutSpriteXAddr	player2, a
-	sprite_PutFlags	player1, $00
+	pop de
 
 .skip_right
 	pop	af
