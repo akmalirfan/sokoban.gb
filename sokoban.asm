@@ -229,15 +229,9 @@ code_begins:
 	push hl
 	call GetTile
 	add a, 2
-	jr nc, .nocarryr
-	inc h
-.nocarryr
 	ld l, a ; Place lower byte of tile address into l
 	ld	d, h
 	add	a, 2
-	jr nc, .nocarry2r
-	inc d
-.nocarry2r
 	ld e, a ; Now, DE contains the address of 2 tiles ahead
 	ld	a, [hl]
 	or a ; Set zero flag
@@ -262,12 +256,12 @@ code_begins:
 .skip_colr
 	pop hl
 	pop af
+	pop de
 	; End: Collision detection (RIGHT)
 	inc	A
 	PutSpriteXAddr	player1, a
 	add a, 8
 	PutSpriteXAddr	player2, a
-	pop de
 
 .skip_right
 	pop	af
