@@ -47,6 +47,8 @@ include "memory.asm"
 
 	SpriteAttr	player1	; declare "player1" as a sprite
 	SpriteAttr	player2
+	SpriteAttr	crate1
+	SpriteAttr	crate2
 
 code_begins:
 	di	; disable interrupts
@@ -76,8 +78,8 @@ code_begins:
 
 	; see where we declare "player1" as a sprite-variable above
 	; set X=20, Y=10, Tile=$19, Flags=0
-	PutSpriteXAddr	player1, 16 * 5 ; * 6
-	PutSpriteYAddr	player1, 16 * 4 ; * 5
+	PutSpriteXAddr	player1, 16 * 5
+	PutSpriteYAddr	player1, 16 * 4
 	sprite_PutTile	player1, $02
 	sprite_PutFlags	player1, $00
 
@@ -85,6 +87,16 @@ code_begins:
 	PutSpriteYAddr	player2, 16 * 4
 	sprite_PutTile	player2, $02
 	sprite_PutFlags	player2, $20
+
+	PutSpriteXAddr	crate1, 160
+	PutSpriteYAddr	crate1, 0
+	sprite_PutTile	crate1, $04
+	sprite_PutFlags	crate1, $00
+
+	PutSpriteXAddr	crate2, 160 + 8
+	PutSpriteYAddr	crate2, 0
+	sprite_PutTile	crate2, $04
+	sprite_PutFlags	crate2, $20
 
 	ld e, $16
 .loop
