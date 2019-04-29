@@ -161,22 +161,45 @@ code_begins:
 	ld	e, 1
 
 	; Begin: Collision detection (DOWN)
+	push de
 	push af
 	push hl
 	call GetTile
 	add a, $40
-	jr nc, .nocarry
+	jr nc, .nocarryd
 	inc h
-.nocarry
+.nocarryd
 	ld l, a ; Place lower byte of tile address into l
+	ld	d, h
+	add	a, $40
+	jr nc, .nocarry2d
+	inc d
+.nocarry2d
+	ld e, a ; Now, DE contains the address of 2 tiles ahead
 	ld	a, [hl]
 	or a ; Set zero flag
-	pop hl
 	jr z, .skip_cold
+	; Check whether the tile is a crate
+	cp a, 4
+	; If so, check tile after the crate
+	jr nz, .not_crated
+	ld	a, [de]
+	or	a
+	jr nz, .not_crated
+	ld [hl], 0
+	ld h, d
+	ld l, e
+	ld [hl], 4
+	jr .skip_cold
+.not_crated
+	pop hl
 	pop af
+	pop de
 	jr .skip_down
 .skip_cold
+	pop hl
 	pop af
+	pop de
 	; End: Collision detection (DOWN)
 
 	GetSpriteYAddr	player1
@@ -437,7 +460,7 @@ DB $00,$00,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$04,$06,$00,$00,$00,$00,$00,$
 DB $00,$00,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$05,$07,$00,$00,$00,$00,$00,$00
 DB $00,$00,$01,$01,$00,$00,$00,$00,$04,$06,$00,$00,$01,$01,$01,$01,$01,$01,$00,$00
 DB $00,$00,$01,$01,$00,$00,$00,$00,$05,$07,$00,$00,$01,$01,$01,$01,$01,$01,$00,$00
-DB $00,$00,$01,$01,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$04,$06,$01,$01,$00,$00
+DB $00,$00,$01,$01,$01,$01,$01,$01,$01,$01,$04,$00,$00,$00,$04,$06,$01,$01,$00,$00
 DB $00,$00,$01,$01,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$05,$07,$01,$01,$00,$00
 DB $00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$00,$00,$01,$01,$01,$01,$01,$01,$00,$00
 DB $00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$00,$00,$01,$01,$01,$01,$01,$01,$00,$00
