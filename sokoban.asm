@@ -131,22 +131,45 @@ code_begins:
 	jr	z, .skip_up
 	ld	e, -1
 	; Begin: Collision detection (UP)
+	push de
 	push af
 	push hl
 	call GetTile
 	sub a, $40
-	jr nc, .no_borrow
+	jr nc, .nocarryu
 	dec h
-.no_borrow
+.nocarryu
 	ld l, a ; Place lower byte of tile address into l
+	ld	d, h
+	sub	a, $40
+	jr nc, .nocarry2u
+	dec d
+.nocarry2u
+	ld e, a ; Now, DE contains the address of 2 tiles ahead
 	ld	a, [hl]
 	or a ; Set zero flag
-	pop hl
 	jr z, .skip_colu
+	; Check whether the tile is a crate
+	cp a, 4
+	; If so, check tile after the crate
+	jr nz, .not_crateu
+	ld	a, [de]
+	or	a
+	jr nz, .not_crateu
+	ld [hl], 0
+	ld h, d
+	ld l, e
+	ld [hl], 4
+	jr .skip_colu
+.not_crateu
+	pop hl
 	pop af
+	pop de
 	jr .skip_up
 .skip_colu
+	pop hl
 	pop af
+	pop de
 	; End: Collision detection (UP)
 	GetSpriteYAddr	player1
 	dec	A
