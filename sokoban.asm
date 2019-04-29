@@ -213,7 +213,7 @@ code_begins:
 	and	PADF_LEFT
 	jr	z, .skip_left
 	ld	e, -1
-	GetSpriteXAddr	player1
+
 	; Begin: Collision detection (LEFT)
 	push de
 	push af
@@ -249,6 +249,7 @@ code_begins:
 	pop af
 	pop de
 	; End: Collision detection (LEFT)
+	GetSpriteXAddr	player1
 	dec	A
 	PutSpriteXAddr	player1, a
 	add a, 8
@@ -260,8 +261,6 @@ code_begins:
 	and	PADF_RIGHT
 	jr	z, .skip_right
 	ld	e, 1
-
-	GetSpriteXAddr	player1
 
 	; Begin: Collision detection (RIGHT)
 	push de
@@ -298,6 +297,7 @@ code_begins:
 	pop af
 	pop de
 	; End: Collision detection (RIGHT)
+	GetSpriteXAddr	player1
 	inc	A
 	PutSpriteXAddr	player1, a
 	add a, 8
