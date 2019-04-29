@@ -192,22 +192,39 @@ code_begins:
 	ld	e, -1
 	GetSpriteXAddr	player1
 	; Begin: Collision detection (LEFT)
+	push de
 	push af
 	push hl
 	call GetTile
 	sub a, 2
-	jr nc, .nocarryl
-	dec h
-.nocarryl
 	ld l, a ; Place lower byte of tile address into l
+	ld	d, h
+	sub	a, 2
+	ld e, a ; Now, DE contains the address of 2 tiles ahead
 	ld	a, [hl]
 	or a ; Set zero flag
-	pop hl
 	jr z, .skip_coll
+	; Check whether the tile is a crate
+	cp a, 4
+	; If so, check tile after the crate
+	jr nz, .not_cratel
+	ld	a, [de]
+	or	a
+	jr nz, .not_cratel
+	ld [hl], 0
+	ld h, d
+	ld l, e
+	ld [hl], 4
+	jr .skip_coll
+.not_cratel
+	pop hl
 	pop af
+	pop de
 	jr .skip_left
 .skip_coll
+	pop hl
 	pop af
+	pop de
 	; End: Collision detection (LEFT)
 	dec	A
 	PutSpriteXAddr	player1, a
