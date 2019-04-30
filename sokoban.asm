@@ -129,12 +129,22 @@ code_begins:
 	PutSpriteXAddr	player1, a
 	add a, 8 ; Because the second sprite is 8 pixels to the right
 	PutSpriteXAddr	player2, a
+
+	; Move crate sprites
+	bit 0, c
+	jr z, .loop
+	add a, 8
+	PutSpriteXAddr	crate1, a
+	add a, 8
+	PutSpriteXAddr	crate2, a
+
 	jr .loop
 
 ; From here, should check the current direction and stop the player
 ; from moving if there's something blocking
 
 .cont
+	ld c, 0
 	call	jpad_GetKeys
 
 	; move character if corresponding button has been pushed
@@ -317,16 +327,21 @@ code_begins:
 	ld	a, [de]
 	or	a
 	jr nz, .not_crate
+	ld c, 1 ; Just a flag to denote crate teleportation. Maybe I should use just 1 bit
 	ld [hl], 0
 	ld h, d
 	ld l, e
 	ld [hl], 4
-	jr .skip_colr
+	jr .teleport_crate
 .not_crate
 	pop hl
 	pop af
 	pop de
 	jr .skip_right
+.teleport_crate
+	GetSpriteYAddr	player1
+	PutSpriteYAddr	crate1, a
+	PutSpriteYAddr	crate2, a
 .skip_colr
 	pop hl
 	pop af
@@ -501,5 +516,5 @@ DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$
 ; DB $00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$00,$00,$01,$01,$01,$01,$01,$01,$00,$00
 ; DB $00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,$00
 ; DB $00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,$00
-; DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+; DB $00,$00,$04,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 ; DB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
