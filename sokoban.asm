@@ -395,26 +395,27 @@ jpad_GetKeys:
 	ld	a, b	; register A holds result. Each bit represents a key
 	ret
 
+; Put the tile address inside HA (not HL but I think I'm going to change that)
 GetTile:
 	; _SCRN + (y-$10) * 4 + (x - $8) / 8
+	GetSpriteYAddr	player1
+	ld	h, $98
+	ld	l, a
+	sla l
+	jr nc, .cont1u
+	inc h
+	sla l
+	inc h
+	jr .cont2u
+.cont1u
+	sla l
+	jr nc, .cont2u
+	inc h
+.cont2u
 	GetSpriteXAddr	player1
 	srl a
 	srl a
 	srl a
-	ld	l, a ; Using l as temporary storage
-	GetSpriteYAddr	player1
-	ld	h, $98
-	sla a
-	jr nc, .cont1u
-	inc h
-	sla a
-	inc h
-	jr .cont2u
-.cont1u
-	sla a
-	jr nc, .cont2u
-	inc h
-.cont2u
 	add a, l ; TODO: Need to investigate the probability of having carry
 	ret
 
