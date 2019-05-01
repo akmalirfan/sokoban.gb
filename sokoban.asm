@@ -123,7 +123,7 @@ code_begins:
 	GetSpriteXAddr	player1
 	ld	d, a
 	and $f
-	jr z, .cont
+	jr z, .put_crate
 	ld	a, d
 	add	a, e
 	PutSpriteXAddr	player1, a
@@ -143,8 +143,27 @@ code_begins:
 ; From here, should check the current direction and stop the player
 ; from moving if there's something blocking
 
-.cont
+.put_crate
+	bit 0, c
+	jr z, .cont
+	; Put crate tile
+	call GetTile
+	add a, 2
+	ld	l, a
+	ld	[hl], $04
+	inc hl
+	ld	[hl], $06
+	add a, $20
+	ld	l, a
+	jr nc, .nocarryput
+	inc h
+.nocarryput
+	ld	[hl], $05
+	inc hl
+	ld	[hl], $07
+
 	ld c, 0
+.cont
 	call	jpad_GetKeys
 
 	; move character if corresponding button has been pushed
@@ -329,9 +348,17 @@ code_begins:
 	jr nz, .not_crate
 	ld c, 1 ; Just a flag to denote crate teleportation. Maybe I should use just 1 bit
 	ld [hl], 0
-	ld h, d
-	ld l, e
-	ld [hl], 4
+	inc hl
+	ld [hl], 0
+	ld	a, l
+	add a, $20
+	ld	l, a
+	jr nc, .nocarry_erase
+	inc h
+.nocarry_erase
+	ld [hl], 0
+	dec hl
+	ld [hl], 0
 	jr .teleport_crate
 .not_crate
 	pop hl
