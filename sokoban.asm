@@ -60,7 +60,7 @@ code_begins:
 	ld	[rIE], a	; Set only Vblank interrupt flag
 	ei			; enable interrupts. Only vblank will trigger
 
-	ld	a,0		;
+	xor	a			; a = 0
 	ldh	[rLCDC],a	;turn off LCD
 
 	call LOAD_TILES
@@ -123,32 +123,55 @@ code_begins:
 	GetSpriteXAddr	player1
 	ld	d, a
 	and $f
-	jr z, .put_crate
+	jr z, .get_crate_addr
 	ld	a, d
 	add	a, e
 	PutSpriteXAddr	player1, a
 	add a, 8 ; Because the second sprite is 8 pixels to the right
 	PutSpriteXAddr	player2, a
 
-	; Move crate sprites
+	; Move crate sprites (RIGHT)
 	bit 0, c
-	jr z, .loop
+	jr z, .crate_move_left
 	add a, 8
 	PutSpriteXAddr	crate1, a
 	add a, 8
 	PutSpriteXAddr	crate2, a
+	jr .tele_y
 
-	jr .loop
+	; Move crate sprites (LEFT)
+.crate_move_left
+	bit 1, c
+	jr z, .loop
+	sub a, 16
+	PutSpriteXAddr	crate2, a
+	sub a, 8
+	PutSpriteXAddr	crate1, a
+
+.tele_y
+	GetSpriteYAddr	player1
+	PutSpriteYAddr	crate1, a
+	PutSpriteYAddr	crate2, a
+
+	jp .loop
 
 ; From here, should check the current direction and stop the player
 ; from moving if there's something blocking
 
-.put_crate
+.get_crate_addr
 	bit 0, c
-	jr z, .cont
+	jr z, .get_crate_addrl
 	; Put crate tile
 	call GetTile
 	add a, 2
+	jr .put_crate
+.get_crate_addrl
+	bit 1, c
+	jr z, .cont
+	; Put crate tile
+	call GetTile
+	sub a, 2
+.put_crate
 	ld	l, a
 	ld	[hl], $04
 	inc hl
@@ -298,10 +321,19 @@ code_begins:
 	ld	a, [de]
 	or	a
 	jr nz, .not_cratel
+	ld c, 2
 	ld [hl], 0
-	ld h, d
-	ld l, e
-	ld [hl], 4
+	inc hl
+	ld [hl], 0
+	ld	a, l
+	add a, $20
+	ld	l, a
+	jr nc, .nocarry_erasel
+	inc h
+.nocarry_erasel
+	ld [hl], 0
+	dec hl
+	ld [hl], 0
 	jr .skip_coll
 .not_cratel
 	pop hl
@@ -346,7 +378,7 @@ code_begins:
 	ld	a, [de]
 	or	a
 	jr nz, .not_crate
-	ld c, 1 ; Just a flag to denote crate teleportation. Maybe I should use just 1 bit
+	ld c, 1 ; Just a flag to denote crate teleportation
 	ld [hl], 0
 	inc hl
 	ld [hl], 0
@@ -359,16 +391,12 @@ code_begins:
 	ld [hl], 0
 	dec hl
 	ld [hl], 0
-	jr .teleport_crate
+	jr .skip_colr
 .not_crate
 	pop hl
 	pop af
 	pop de
 	jr .skip_right
-.teleport_crate
-	GetSpriteYAddr	player1
-	PutSpriteYAddr	crate1, a
-	PutSpriteYAddr	crate2, a
 .skip_colr
 	pop hl
 	pop af
