@@ -123,8 +123,8 @@ code_begins:
 	GetSpriteXAddr	player1
 	ld	d, a
 	and $f
-	jr z, .get_crate_addr
-	ld	a, d
+	jp z, .get_crate_addr
+	ld	a, d ; 0282
 	add	a, e
 	PutSpriteXAddr	player1, a
 	add a, 8 ; Because the second sprite is 8 pixels to the right
@@ -142,17 +142,33 @@ code_begins:
 	; Move crate sprites (LEFT)
 .crate_move_left
 	bit 1, c
-	jr z, .loop
+	jr z, .crate_move_down
 	sub a, 16
 	PutSpriteXAddr	crate2, a
 	sub a, 8
 	PutSpriteXAddr	crate1, a
+	jr .tele_y
+
+.crate_move_down
+	bit 2, c ; 02CA
+	jr z, .loop
+	GetSpriteYAddr	player1
+	add a, 16
+	PutSpriteYAddr	crate1, a
+	PutSpriteYAddr	crate2, a
+	jr .tele_x
+
+.tele_x
+	GetSpriteXAddr	player1
+	PutSpriteXAddr	crate1, a
+	add a, 8
+	PutSpriteXAddr	crate2, a
+	jp .loop
 
 .tele_y
 	GetSpriteYAddr	player1
 	PutSpriteYAddr	crate1, a
 	PutSpriteYAddr	crate2, a
-
 	jp .loop
 
 ; From here, should check the current direction and stop the player
@@ -167,10 +183,19 @@ code_begins:
 	jr .put_crate
 .get_crate_addrl
 	bit 1, c
-	jr z, .cont
+	jr z, .get_crate_addrd
 	; Put crate tile
 	call GetTile
 	sub a, 2
+	jr .put_crate
+.get_crate_addrd
+	bit 2, c ; 032F
+	jr z, .cont
+	; Put crate tile
+	call GetTile
+	add a, $40
+	jr nc, .put_crate
+	inc h
 .put_crate
 	ld	l, a
 	ld	[hl], $04
@@ -273,10 +298,22 @@ code_begins:
 	ld	a, [de]
 	or	a
 	jr nz, .not_crated
+	ld c, 4 ; Flag to denote crate teleportation
 	ld [hl], 0
-	ld h, d
-	ld l, e
-	ld [hl], 4
+	inc hl
+	ld [hl], 0
+	ld	a, l
+	add a, $20
+	ld	l, a
+	jr nc, .nocarry_erased
+	inc h
+.nocarry_erased
+	ld [hl], 0
+	dec hl
+	ld [hl], 0
+	; ld h, d
+	; ld l, e
+	; ld [hl], 4
 	jr .skip_cold
 .not_crated
 	pop hl
