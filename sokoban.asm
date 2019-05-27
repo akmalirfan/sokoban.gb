@@ -114,7 +114,7 @@ code_begins:
 	add	a, e
 	PutSpriteYAddr	player1, a
 	PutSpriteYAddr	player2, a
-	jp .loop
+	jr .move_sprite
 
 .pop_af
 	pop af
@@ -130,6 +130,7 @@ code_begins:
 	add a, 8 ; Because the second sprite is 8 pixels to the right
 	PutSpriteXAddr	player2, a
 
+.move_sprite
 	; Move crate sprites (RIGHT)
 	bit 0, c
 	jr z, .crate_move_left
