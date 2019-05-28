@@ -218,18 +218,32 @@ code_begins:
 	jr .put_crate
 .put_crate
 	ld	l, a
+	ld 	a, [hl]
+	cp	a, $19
+	jr	z, .put_cratedone
 	ld	[hl], $04
 	inc hl
 	ld	[hl], $06
-	add a, $20
-	ld	l, a
-	jr nc, .nocarryput
-	inc h
-.nocarryput
-	ld	[hl], $05
-	inc hl
+	ld	b, 0
+	ld	c, $20
+	add hl, bc
 	ld	[hl], $07
+	dec hl
+	ld	[hl], $05
+	jr	.done_put
 
+.put_cratedone
+	ld	[hl], $08
+	inc hl
+	ld	[hl], $0A
+	ld	b, 0
+	ld	c, $20
+	add hl, bc
+	ld	[hl], $0B
+	dec hl
+	ld	[hl], $09
+
+.done_put
 	ld c, 0
 .cont
 	call	jpad_GetKeys
@@ -264,7 +278,10 @@ code_begins:
 	jr nz, .not_crateu
 	ld	a, [de]
 	or	a
+	jr z, .eraseup
+	cp a, $19
 	jr nz, .not_crateu
+.eraseup
 	ld c, 8 ; Flag to denote crate teleportation
 	ld [hl], 0
 	inc hl
@@ -543,7 +560,7 @@ GetTile:
 LOAD_TILES::
 	ld	hl,TILES_DATA
 	ld	de,_VRAM + 16 ; Skip the first 16 bytes to preserve the blank tile
-	ld	bc,7*16
+	ld	bc,11*16
 LOAD_TILES_LOOP::
 	ld	a,[hl+]	;get a byte from our tiles, and increment.
 	ld	[de],a	;put that byte in VRAM and
@@ -600,13 +617,22 @@ DB $3B,$C4,$73,$8C,$E3,$1C,$C3,$3C
 DB $C3,$3C,$E3,$1C,$73,$8C,$3B,$C4
 DB $1F,$E0,$0F,$F0,$FF,$00,$FE,$00
 
+DB $7F,$00,$FF,$00,$F0,$00,$F8,$00
+DB $DC,$00,$CE,$00,$C7,$00,$C3,$00
+DB $C3,$00,$C7,$00,$CE,$00,$DC,$00
+DB $F8,$00,$F0,$00,$FF,$00,$7F,$00
+DB $FE,$00,$FF,$00,$0F,$00,$1F,$00
+DB $3B,$00,$73,$00,$E3,$00,$C3,$00
+DB $C3,$00,$E3,$00,$73,$00,$3B,$00
+DB $1F,$00,$0F,$00,$FF,$00,$FE,$00
+
 SECTION "Map", ROM0
 
 LEVEL_1::
 DB $00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00
 DB $00,$00,$00,$00,$00,$00,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00
-DB $00,$00,$00,$00,$00,$00,$01,$01,$00,$00,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00
-DB $00,$00,$00,$00,$00,$00,$01,$01,$00,$00,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$01,$01,$19,$19,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$01,$01,$19,$19,$01,$01,$00,$00,$00,$00,$00,$00,$00,$00
 DB $00,$00,$00,$00,$00,$00,$01,$01,$00,$00,$01,$01,$01,$01,$01,$01,$01,$01,$00,$00
 DB $00,$00,$00,$00,$00,$00,$01,$01,$00,$00,$01,$01,$01,$01,$01,$01,$01,$01,$00,$00
 DB $00,$00,$01,$01,$01,$01,$01,$01,$04,$06,$04,$06,$00,$00,$00,$00,$01,$01,$00,$00
