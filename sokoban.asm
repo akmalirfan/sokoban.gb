@@ -169,6 +169,8 @@ code_begins:
 	jr .tele_x
 
 .tele_x
+	sprite_PutTile	crate1, $04
+	sprite_PutTile	crate2, $04
 	GetSpriteXAddr	player1
 	PutSpriteXAddr	crate1, a
 	add a, 8
@@ -176,6 +178,8 @@ code_begins:
 	jp .loop
 
 .tele_y
+	sprite_PutTile	crate1, $04
+	sprite_PutTile	crate2, $04
 	GetSpriteYAddr	player1
 	PutSpriteYAddr	crate1, a
 	PutSpriteYAddr	crate2, a
@@ -242,6 +246,8 @@ code_begins:
 	ld	[hl], $0B
 	dec hl
 	ld	[hl], $09
+	sprite_PutTile	crate1, $08
+	sprite_PutTile	crate2, $08
 
 .done_put
 	ld c, 0
