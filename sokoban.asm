@@ -124,7 +124,7 @@ code_begins:
 	ld	d, a
 	and $f
 	jp z, .get_crate_addr
-	ld	a, d ; 0282
+	ld	a, d
 	add	a, e
 	PutSpriteXAddr	player1, a
 	add a, 8 ; Because the second sprite is 8 pixels to the right
@@ -151,10 +151,19 @@ code_begins:
 	jr .tele_y
 
 .crate_move_down
-	bit 2, c ; 02CA
-	jr z, .loop
+	bit 2, c
+	jr z, .crate_move_up
 	GetSpriteYAddr	player1
 	add a, 16
+	PutSpriteYAddr	crate1, a
+	PutSpriteYAddr	crate2, a
+	jr .tele_x
+
+.crate_move_up
+	bit 3, c
+	jp z, .loop
+	GetSpriteYAddr	player1
+	sub a, 16
 	PutSpriteYAddr	crate1, a
 	PutSpriteYAddr	crate2, a
 	jr .tele_x
@@ -191,12 +200,22 @@ code_begins:
 	jr .put_crate
 .get_crate_addrd
 	bit 2, c ; 032F
-	jr z, .cont
+	jr z, .get_crate_addru
 	; Put crate tile
 	call GetTile
 	add a, $40
 	jr nc, .put_crate
 	inc h
+	jr .put_crate
+.get_crate_addru
+	bit 3, c
+	jr z, .cont
+	; Put crate tile
+	call GetTile
+	sub a, $40
+	jr nc, .put_crate
+	dec h
+	jr .put_crate
 .put_crate
 	ld	l, a
 	ld	[hl], $04
@@ -246,10 +265,19 @@ code_begins:
 	ld	a, [de]
 	or	a
 	jr nz, .not_crateu
+	ld c, 8 ; Flag to denote crate teleportation
 	ld [hl], 0
-	ld h, d
-	ld l, e
-	ld [hl], 4
+	inc hl
+	ld [hl], 0
+	ld	a, l
+	add a, $20
+	ld	l, a
+	jr nc, .nocarry_eraseu
+	inc h
+.nocarry_eraseu
+	ld [hl], 0
+	dec hl
+	ld [hl], 0
 	jr .skip_colu
 .not_crateu
 	pop hl
