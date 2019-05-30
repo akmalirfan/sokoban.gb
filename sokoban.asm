@@ -216,24 +216,9 @@ code_begins:
 	jr z, .cont
 	; Put crate tile
 	call GetTile
-	bit 7, c
-	jr z, .pass_rdu
-.redraw_cdu
-	ld	l, a
-	ld	[hl], $19
-	inc hl
-	ld	[hl], $19
-	ld	b, 0
-	ld	c, $20
-	add hl, bc
-	ld	[hl], $19
-	dec hl
-	ld	[hl], $19
-.pass_rdu
 	sub a, $40
 	jr nc, .put_crate
 	dec h
-	jr .put_crate
 .put_crate
 	ld	l, a
 	ld 	a, [hl]
@@ -301,14 +286,28 @@ code_begins:
 	; or a donecrate
 	cp a, $08
 	jr nz, .not_crateu
-	set 7, c ; Flag to denote target redraw needed
+.rdup
+	set 3, c ; Flag to denote crate teleportation
+	ld [hl], $19
+	inc hl
+	ld [hl], $19
+	ld	a, l
+	add a, $20
+	ld	l, a
+	jr nc, .nocarry_rdu
+	inc h
+.nocarry_rdu
+	ld [hl], $19
+	dec hl
+	ld [hl], $19
+	jr .skip_colu
 .up_pushable
 	; If so, check tile after the crate
 	ld	a, [de]
 	or	a
 	jr z, .eraseup
 	cp a, $19
-	jr nz, .not_crateu
+	jr nz, .skip_colu
 .eraseup
 	set 3, c ; Flag to denote crate teleportation
 	ld [hl], 0
