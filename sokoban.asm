@@ -149,6 +149,7 @@ code_begins:
 	PutSpriteXAddr	crate1, a
 	jr .tele_y
 
+	; Move crate sprites (DOWN)
 .crate_move_down
 	bit 2, c
 	jr z, .crate_move_up
@@ -158,6 +159,7 @@ code_begins:
 	PutSpriteYAddr	crate2, a
 	jr .tele_x
 
+	; Move crate sprites (UP)
 .crate_move_up
 	bit 3, c
 	jp z, .loop
@@ -202,7 +204,7 @@ code_begins:
 	sub a, 2
 	jr .put_crate
 .get_crate_addrd
-	bit 2, c ; 032F
+	bit 2, c
 	jr z, .get_crate_addru
 	; Put crate tile
 	call GetTile
@@ -285,7 +287,7 @@ code_begins:
 	; or a donecrate
 	cp a, $08
 	jr nz, .not_crateu
-.rdup
+.rdu
 	; Check whether the tile after it is clear
 	ld	a, [de]
 	or	a
@@ -348,7 +350,7 @@ code_begins:
 	pop	af	; restore register A (joypad info)
 	push	af	; save (again) reg. A
 	and	PADF_DOWN
-	jr	z, .skip_down
+	jp	z, .skip_down
 	ld	e, 1
 
 	; Begin: Collision detection (DOWN)
@@ -370,14 +372,46 @@ code_begins:
 	ld	a, [hl]
 	or a ; Set zero flag
 	jr z, .skip_cold
+	; Or is it target tile?
+	cp a, $0C
+	jr z, .skip_colu
 	; Check whether the tile is a crate
 	cp a, 4
-	; If so, check tile after the crate
+	jr z, .down_pushable
+	; or a donecrate
+	cp a, $08
 	jr nz, .not_crated
+.rdd
+	; Check whether the tile after it is clear
 	ld	a, [de]
 	or	a
+	jr z, .proceed_rdd
+	cp a, $0C
 	jr nz, .not_crated
-	ld c, 4 ; Flag to denote crate teleportation
+.proceed_rdd
+	set 2, c ; Flag to denote crate teleportation
+	ld [hl], $0C
+	inc hl
+	ld [hl], $0C
+	ld	a, l
+	add a, $20
+	ld	l, a
+	jr nc, .nocarry_rdd
+	inc h
+.nocarry_rdd
+	ld [hl], $0C
+	dec hl
+	ld [hl], $0C
+	jr .skip_cold
+.down_pushable
+	; If so, check tile after the crate
+	ld	a, [de]
+	or	a
+	jr z, .erasedown
+	cp a, $0C
+	jr nz, .not_crated
+.erasedown
+	set 2, c ; Flag to denote crate teleportation
 	ld [hl], 0
 	inc hl
 	ld [hl], 0
@@ -390,9 +424,6 @@ code_begins:
 	ld [hl], 0
 	dec hl
 	ld [hl], 0
-	; ld h, d
-	; ld l, e
-	; ld [hl], 4
 	jr .skip_cold
 .not_crated
 	pop hl
