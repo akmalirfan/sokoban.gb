@@ -374,7 +374,7 @@ code_begins:
 	jr z, .skip_cold
 	; Or is it target tile?
 	cp a, $0C
-	jr z, .skip_colu
+	jr z, .skip_cold
 	; Check whether the tile is a crate
 	cp a, 4
 	jr z, .down_pushable
@@ -552,7 +552,7 @@ code_begins:
 	jr z, .skip_colr
 	; Or is it target tile?
 	cp a, $0C
-	jr z, .skip_coll
+	jr z, .skip_colr
 	; Check whether the tile is a crate
 	cp a, 4
 	jr z, .right_pushable
