@@ -550,14 +550,46 @@ code_begins:
 	ld	a, [hl]
 	or a ; Set zero flag
 	jr z, .skip_colr
+	; Or is it target tile?
+	cp a, $0C
+	jr z, .skip_coll
 	; Check whether the tile is a crate
 	cp a, 4
-	; If so, check tile after the crate
+	jr z, .right_pushable
+	; or a donecrate
+	cp a, $08
 	jr nz, .not_crate
+.rdr
+	; Check whether the tile after it is clear
 	ld	a, [de]
 	or	a
+	jr z, .proceed_rdr
+	cp a, $0C
 	jr nz, .not_crate
-	ld c, 1 ; Just a flag to denote crate teleportation
+.proceed_rdr
+	set 0, c ; Flag to denote crate teleportation
+	ld [hl], $0C
+	inc hl
+	ld [hl], $0C
+	ld	a, l
+	add a, $20
+	ld	l, a
+	jr nc, .nocarry_rdr
+	inc h
+.nocarry_rdr
+	ld [hl], $0C
+	dec hl
+	ld [hl], $0C
+	jr .skip_colr
+.right_pushable
+	; If so, check tile after the crate
+	ld	a, [de]
+	or	a
+	jr z, .eraseright
+	cp a, $0C
+	jr nz, .not_crate
+.eraseright
+	set 0, c ; Flag to denote crate teleportation
 	ld [hl], 0
 	inc hl
 	ld [hl], 0
