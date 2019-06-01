@@ -255,7 +255,7 @@ code_begins:
 	; move character if corresponding button has been pushed
 	push	af	; save register A (joypad info)
 	and	PADF_UP	; compare joypad info. Set NZ flag if UP bit present
-	jr	z, .skip_up
+	jp	z, .skip_up
 	ld	e, -1
 	; Begin: Collision detection (UP)
 	push de
@@ -286,6 +286,13 @@ code_begins:
 	cp a, $08
 	jr nz, .not_crateu
 .rdup
+	; Check whether the tile after it is clear
+	ld	a, [de]
+	or	a
+	jr z, .proceed_rdu
+	cp a, $0C
+	jr nz, .not_crateu
+.proceed_rdu
 	set 3, c ; Flag to denote crate teleportation
 	ld [hl], $0C
 	inc hl
@@ -306,7 +313,7 @@ code_begins:
 	or	a
 	jr z, .eraseup
 	cp a, $0C
-	jr nz, .skip_colu
+	jr nz, .not_crateu
 .eraseup
 	set 3, c ; Flag to denote crate teleportation
 	ld [hl], 0
