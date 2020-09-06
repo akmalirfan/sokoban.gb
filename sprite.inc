@@ -8,13 +8,13 @@
 SPRITE_INC  SET  1
 
 OAMDATALOC	EQU	_RAM				; must be multiple of $100
-OAMDATALOCBANK	EQU	OAMDATALOC/$100 
+OAMDATALOCBANK	EQU	OAMDATALOC/$100
 OAMDATALENGTH	EQU	$A0
 
 		printt  "From Sprite.inc\n"
 		printv	OAMDATALOCBANK
 		printt	"\n"
-		
+
 		RSSET	OAMDATALOC
 sprite_RS	SET OAMDATALOC
 
@@ -66,7 +66,7 @@ sprite_GetFlags: MACRO
 PutSpriteXAddr:	MACRO
 		push	af
 		ld	a,\2
-		add	8	
+		add	8
 		ld	[\1_XAddr], a
 		pop	af
 		ENDM
@@ -78,7 +78,7 @@ PutSpriteXAddr:	MACRO
 PutSpriteYAddr:	MACRO
 		push	af
 		ld	a,\2
-		add	16	
+		add	16
 		ld	[\1_YAddr], a
 		pop	af
 		ENDM
@@ -94,31 +94,37 @@ GetSpriteYAddr:	MACRO
 		ENDM
 
 MoveLeft: MACRO
-	; move sprite (\1) to the left by x (\2)
-	GetSpriteXAddr \1  ; ld x into a
-	sub \2
-	PutSpriteXAddr \1, a
+	; move sprite (\2) and sprite (\3) to the left by x (\1)
+	GetSpriteXAddr \2  ; ld x into a
+	sub \1
+	PutSpriteXAddr \2, a
+	add 8
+	PutSpriteXAddr \3, a
 	ENDM
 
 MoveRight: MACRO
-	; move sprite (\1) to the right by x (\2)
-	GetSpriteXAddr \1  ; ld x into a
-	add \2
-	PutSpriteXAddr \1, a
+	; move sprite (\2) and sprite (\3) to the right by x (\1)
+	GetSpriteXAddr \2  ; ld x into a
+	add \1
+	PutSpriteXAddr \2, a
+	add 8
+	PutSpriteXAddr \3, a
 	ENDM
 
 MoveUp: MACRO
-	; move sprite (\1) upwards by y (\2)
-	GetSpriteYAddr \1  ; ld y into a
-	sub \2
-	PutSpriteYAddr \1, a
+	; move sprite (\2) and sprite (\3) upwards by y (\1)
+	GetSpriteYAddr \2  ; ld y into a
+	sub \1
+	PutSpriteYAddr \2, a
+	PutSpriteYAddr \3, a
 	ENDM
 
 MoveDown: MACRO
-	; move sprite (\1) downwards by y (\2)
-	GetSpriteYAddr \1  ; ld y into a
-	add \2
-	PutSpriteYAddr \1, a
+	; move sprite (\2) and sprite (\3) downwards by y (\1)
+	GetSpriteYAddr \2  ; ld y into a
+	add \1
+	PutSpriteYAddr \2, a
+	PutSpriteYAddr \3, a
 	ENDM
 
 MoveIfLeft: MACRO
