@@ -341,10 +341,7 @@ code_begins:
 	pop af
 	pop de
 	; End: Collision detection (UP)
-	GetSpriteYAddr	player1
-	dec	A
-	PutSpriteYAddr	player1, a
-	PutSpriteYAddr	player2, a
+	MoveUp	1, player1, player2
 	jp .skip_right
 .skip_up
 	pop	af	; restore register A (joypad info)
@@ -435,11 +432,7 @@ code_begins:
 	pop af
 	pop de
 	; End: Collision detection (DOWN)
-
-	GetSpriteYAddr	player1
-	inc	A
-	PutSpriteYAddr	player1, a
-	PutSpriteYAddr	player2, a
+	MoveDown	1, player1, player2
 	jp .skip_right
 .skip_down
 	pop	af
@@ -524,11 +517,7 @@ code_begins:
 	pop af
 	pop de
 	; End: Collision detection (LEFT)
-	GetSpriteXAddr	player1
-	dec	A
-	PutSpriteXAddr	player1, a
-	add a, 8
-	PutSpriteXAddr	player2, a
+	MoveLeft	1, player1, player2
 	jp .skip_right
 .skip_left
 	pop	af
@@ -613,11 +602,7 @@ code_begins:
 	pop af
 	pop de
 	; End: Collision detection (RIGHT)
-	GetSpriteXAddr	player1
-	inc	A
-	PutSpriteXAddr	player1, a
-	add a, 8
-	PutSpriteXAddr	player2, a
+	MoveRight	1, player1, player2
 
 .skip_right
 	pop	af
