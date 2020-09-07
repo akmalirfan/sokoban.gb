@@ -93,6 +93,22 @@ GetSpriteYAddr:	MACRO
 		sub	16
 		ENDM
 
+; Erase the crate tile
+EraseCrate: MACRO
+	set \1, c ; Flag to denote crate teleportation
+	ld [hl], 0
+	inc hl
+	ld [hl], 0
+	ld	a, l
+	add $20
+	ld	l, a
+	ld	a, h
+	adc 0 ; Add the carry if any
+	ld [hl], 0
+	dec hl
+	ld [hl], 0
+	ENDM
+
 MoveLeft: MACRO
 	; move sprite (\2) and sprite (\3) to the left by x (\1)
 	GetSpriteXAddr \2  ; ld x into a
