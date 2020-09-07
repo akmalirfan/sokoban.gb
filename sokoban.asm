@@ -317,19 +317,7 @@ code_begins:
 	cp a, $0C
 	jr nz, .not_crateu
 .eraseup
-	set 3, c ; Flag to denote crate teleportation
-	ld [hl], 0
-	inc hl
-	ld [hl], 0
-	ld	a, l
-	add a, $20
-	ld	l, a
-	jr nc, .nocarry_eraseu
-	inc h
-.nocarry_eraseu
-	ld [hl], 0
-	dec hl
-	ld [hl], 0
+	EraseCrate 3
 	jr .skip_colu
 .not_crateu
 	pop hl
@@ -408,19 +396,7 @@ code_begins:
 	cp a, $0C
 	jr nz, .not_crated
 .erasedown
-	set 2, c ; Flag to denote crate teleportation
-	ld [hl], 0
-	inc hl
-	ld [hl], 0
-	ld	a, l
-	add a, $20
-	ld	l, a
-	jr nc, .nocarry_erased
-	inc h
-.nocarry_erased
-	ld [hl], 0
-	dec hl
-	ld [hl], 0
+	EraseCrate 2
 	jr .skip_cold
 .not_crated
 	pop hl
@@ -493,19 +469,7 @@ code_begins:
 	cp a, $0C
 	jr nz, .not_cratel
 .eraseleft
-	set 1, c ; Flag to denote crate teleportation
-	ld [hl], 0
-	inc hl
-	ld [hl], 0
-	ld	a, l
-	add a, $20
-	ld	l, a
-	jr nc, .nocarry_erasel
-	inc h
-.nocarry_erasel
-	ld [hl], 0
-	dec hl
-	ld [hl], 0
+	EraseCrate 1
 	jr .skip_coll
 .not_cratel
 	pop hl
@@ -578,19 +542,7 @@ code_begins:
 	cp a, $0C
 	jr nz, .not_crate
 .eraseright
-	set 0, c ; Flag to denote crate teleportation
-	ld [hl], 0
-	inc hl
-	ld [hl], 0
-	ld	a, l
-	add a, $20
-	ld	l, a
-	jr nc, .nocarry_erase
-	inc h
-.nocarry_erase
-	ld [hl], 0
-	dec hl
-	ld [hl], 0
+	EraseCrate 0
 	jr .skip_colr
 .not_crate
 	pop hl
